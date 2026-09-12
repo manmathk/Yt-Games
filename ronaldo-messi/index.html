@@ -429,6 +429,20 @@
       grid-template-columns:1fr auto auto;
       gap:8px;
       pointer-events:auto;
+      opacity:1;
+      transform:translateY(0);
+      transition:opacity .28s ease,transform .28s ease;
+    }
+    .game.live-mode .controls{
+      opacity:0;
+      transform:translateY(16px);
+      pointer-events:none;
+    }
+    .game.live-mode.show-controls .controls,
+    .game.live-mode:focus-within .controls{
+      opacity:1;
+      transform:translateY(0);
+      pointer-events:auto;
     }
     .btn{
       min-height:46px;
@@ -559,6 +573,7 @@
   <script>
     (() => {
       const arena = document.getElementById('arena');
+      const game = document.querySelector('.game');
       const rBall = document.getElementById('rBall');
       const mBall = document.getElementById('mBall');
       const rShadow = document.getElementById('rShadow');
@@ -590,13 +605,15 @@
         scores:{r:0,m:0},
         streak:{side:null,count:0},
         last:performance.now(),
+        roundStart:0,
         q:null,
         audio:null,
-        beatTimer:null
+        beatTimer:null,
+        controlsTimer:null
       };
 
       const comments = {
-        r:['Ronaldo launches one into the lights.','CR7 is heating up. Chat is going wild.','Ronaldo takes the lead with power.'],
+        r:['Ronaldo launches one into the lights.','CR7 is heating up. Chat is going wild.','Ronaldo smashes it home with power.'],
         m:['Messi curls it home. Pure control.','Messi answers with magic.','That was a calm Messi finish.']
       };
 
@@ -802,6 +819,7 @@
         if (!state.started) return;
         state.heat = Math.max(35, state.heat - 3);
         state.q = {r:makeBall('r'), m:makeBall('m'), done:false};
+        state.roundStart = performance.now();
         updateHud();
         setMessage('Vote in chat: CR7 or Messi?');
       }
@@ -880,6 +898,7 @@
             const ar = Math.hypot(a.x - c.x, a.y - c.y);
             const br = Math.hypot(b.x - c.x, b.y - c.y);
             if (ar < target || br < target) finish(ar <= br ? 'r' : 'm');
+            else if (state.roundStart && t - state.roundStart > 9000) finish(ar <= br ? 'r' : 'm');
           }
           drawBall(rBall,a);
           drawBall(mBall,b);
@@ -892,8 +911,12 @@
       function start(){
         if (state.started) return;
         state.started = true;
+        state.locked = true;
+        state.q = null;
+        game.classList.add('live-mode');
         overlay.classList.add('hidden');
         startBtn.textContent = 'Running';
+        revealControls();
         startBeat();
         setMessage('Match starting. Keep the arena centered on stream.');
         speak('Ronaldo versus Messi. The live arena starts now.', countdownRound);
@@ -922,11 +945,25 @@
         }
       }
 
+      function revealControls(){
+        if (!state.started) return;
+        game.classList.add('show-controls');
+        clearTimeout(state.controlsTimer);
+        state.controlsTimer = setTimeout(() => game.classList.remove('show-controls'), 2200);
+      }
+
       startBtn.addEventListener('click', start);
       overlayStart.addEventListener('click', start);
       resetBtn.addEventListener('click', reset);
       soundBtn.addEventListener('click', toggleSound);
+      game.addEventListener('pointermove', revealControls);
+      game.addEventListener('pointerdown', revealControls);
       arena.addEventListener('click', () => state.started ? null : start());
+      document.addEventListener('keydown', event => {
+        if (event.key === ' ' && !state.started) start();
+        if (event.key.toLowerCase() === 'm') toggleSound();
+        if (event.key.toLowerCase() === 'r') reset();
+      });
       window.addEventListener('resize', () => {
         if (!state.q) return;
         state.q.r = makeBall('r');
