@@ -20,26 +20,44 @@
 <div class="big" id="big">अंक!</div><div class="count" id="count">3</div>
 <div class="bottom"><div class="stats"><div class="stat"><small>आगे</small><b id="leader">बराबर</b></div><div class="stat"><small>अंतर</small><b id="gap">0</b></div></div><div class="ticker" id="ticker">चारों गेंदें एक ही बिंदु से शुरू होंगी</div></div>
 <div class="controls"><button class="btn primary" id="start">मैच शुरू करें</button><button class="btn icon" id="sound">🔊</button><button class="btn icon" id="reset">↻</button></div>
-<div class="overlay" id="overlay"><div class="card"><h1>ग्रैविटी<br>मुकाबला</h1><p>चारों खिलाड़ी हर राउंड में बिल्कुल एक ही शुरुआती बिंदु से निकलेंगे। चार अलग दिशाओं में समान शुरुआती गति होगी और फिर केवल समान गुरुत्वाकर्षण व वास्तविक टक्कर physics काम करेगी।</p><button class="btn primary" id="go">लाइव शुरू करें</button></div></div>
+<div class="overlay" id="overlay"><div class="card"><h1>ग्रैविटी<br>मुकाबला</h1><p>चारों खिलाड़ी हर राउंड में बिल्कुल एक ही शुरुआती बिंदु से निकलेंगे। दिशा हर राउंड बदलेगी ताकि किसी खिलाड़ी को स्थायी फायदा न मिले।</p><button class="btn primary" id="go">लाइव शुरू करें</button></div></div>
 </main>
 <script>
 (()=>{
 const $=id=>document.getElementById(id),g=$("game"),a=$("arena"),cv=$("fx"),ctx=cv.getContext("2d");
 const P=[{name:'मोदी',short:'नमो',color:'#ff8a00'},{name:'राहुल',short:'रागा',color:'#19c6ff'},{name:'विजय',short:'विजय',color:'#ff4d8d'},{name:'अखिलेश',short:'अखि',color:'#7b61ff'}];
-const S={started:false,locked:false,sound:true,round:1,scores:[0,0,0,0],balls:[],parts:[],last:0,acc:0,seed:77};
-const rand=()=>{S.seed=(S.seed*1664525+1013904223)>>>0;return S.seed/4294967296};
+const S={started:false,locked:false,sound:true,round:1,scores:[0,0,0,0],balls:[],parts:[],last:0,acc:0};
 function resize(){const d=devicePixelRatio||1;cv.width=a.clientWidth*d;cv.height=a.clientHeight*d;ctx.setTransform(d,0,0,d,0,0)}
 function hud(){S.scores.forEach((v,i)=>{$('s'+i).textContent=v;$('m'+i).style.width=Math.min(100,Math.max(4,v*12))+'%'});$('round').textContent=S.round;const hi=Math.max(...S.scores),lead=S.scores.map((v,i)=>v===hi?i:-1).filter(i=>i>=0),lo=Math.min(...S.scores);$('leader').textContent=lead.length===4?'बराबर':lead.length>1?'टाई':P[lead[0]].name;$('gap').textContent=hi-lo}
 function msg(t){$('banner').textContent=t;$('ticker').textContent=t}
 function countdown(fn){S.locked=true;let n=3;const tick=()=>{$('count').textContent=n||'GO';$('count').classList.remove('show');void $('count').offsetWidth;$('count').classList.add('show');if(n-->0)setTimeout(tick,550);else setTimeout(()=>{S.locked=false;fn()},250)};tick()}
-function spawn(){const c={x:a.clientWidth/2,y:a.clientHeight*.43};const r=Math.max(18,a.clientWidth*.045);const speed=285;const angles=[-Math.PI/2,0,Math.PI/2,Math.PI];S.balls=P.map((p,i)=>({x:c.x,y:c.y,vx:Math.cos(angles[i])*speed,vy:Math.sin(angles[i])*speed,r,side:i,trail:[],captured:false}));msg('चारों गेंदें एक ही शुरुआती बिंदु से • समान physics')}
-function gravity(p,dt){const c={x:a.clientWidth/2,y:a.clientHeight*.43};let dx=c.x-p.x,dy=c.y-p.y,d=Math.hypot(dx,dy)||1;const soft=55;const accel=90000/(d*d+soft*soft);p.vx+=dx/d*accel*dt;p.vy+=dy/d*accel*dt;const max=480,sp=Math.hypot(p.vx,p.vy);if(sp>max){p.vx=p.vx/sp*max;p.vy=p.vy/sp*max}p.x+=p.vx*dt;p.y+=p.vy*dt;p.trail.push({x:p.x,y:p.y});if(p.trail.length>8)p.trail.shift()}
-function wall(p){const w=a.clientWidth,h=a.clientHeight,r=p.r;if(p.x<r){p.x=r;p.vx=Math.abs(p.vx)*.82}if(p.x>w-r){p.x=w-r;p.vx=-Math.abs(p.vx)*.82}if(p.y<r){p.y=r;p.vy=Math.abs(p.vy)*.82}if(p.y>h-r){p.y=h-r;p.vy=-Math.abs(p.vy)*.82}}
-function collide(A,B){let dx=B.x-A.x,dy=B.y-A.y,d=Math.hypot(dx,dy)||.001,min=A.r+B.r;if(d>=min)return;let nx=dx/d,ny=dy/d,rv=(B.vx-A.vx)*nx+(B.vy-A.vy)*ny;if(rv<0){const j=-rv;A.vx-=j*nx;A.vy-=j*ny;B.vx+=j*nx;B.vy+=j*ny}const push=(min-d)/2;A.x-=nx*push;A.y-=ny*push;B.x+=nx*push;B.y+=ny*push}
-function checkGoal(p){if(p.captured||S.locked)return;const c={x:a.clientWidth/2,y:a.clientHeight*.43},d=Math.hypot(c.x-p.x,c.y-p.y);if(d<Math.max(25,a.clientWidth*.065)){p.captured=true;S.locked=true;S.scores[p.side]++;hud();$('big').textContent=P[p.side].name+' का अंक!';$('big').classList.remove('show');void $('big').offsetWidth;$('big').classList.add('show');msg(P[p.side].name+' ने अंक बनाया • अगला राउंड');setTimeout(()=>{S.round++;S.locked=false;countdown(spawn)},850)}}
+function spawn(){
+ const c={x:a.clientWidth/2,y:a.clientHeight*.43};
+ const r=Math.max(18,a.clientWidth*.045);
+ const holeR=Math.max(25,a.clientWidth*.065);
+ const start={x:c.x,y:c.y-holeR-r-14};
+ const speed=285;
+ const angles=[-Math.PI/2,0,Math.PI/2,Math.PI];
+ const shift=(S.round-1)%4;
+ S.balls=P.map((p,i)=>{const side=(i+shift)%4,ang=angles[side];return {x:start.x,y:start.y,vx:Math.cos(ang)*speed,vy:Math.sin(ang)*speed,r,side:i,trail:[],captured:false,launch:0.55}});
+ msg('चारों गेंदें एक ही शुरुआती बिंदु से • दिशा इस राउंड में बराबर बदली गई');
+}
+function gravity(p,dt){
+ const c={x:a.clientWidth/2,y:a.clientHeight*.43};
+ if(p.launch>0){p.launch-=dt;p.x+=p.vx*dt;p.y+=p.vy*dt;return}
+ let dx=c.x-p.x,dy=c.y-p.y,d=Math.hypot(dx,dy)||1;
+ const soft=65,accel=76000/(d*d+soft*soft);
+ p.vx+=dx/d*accel*dt;p.vy+=dy/d*accel*dt;
+ const max=470,sp=Math.hypot(p.vx,p.vy);if(sp>max){p.vx=p.vx/sp*max;p.vy=p.vy/sp*max}
+ p.x+=p.vx*dt;p.y+=p.vy*dt;
+ p.trail.push({x:p.x,y:p.y});if(p.trail.length>8)p.trail.shift();
+}
+function wall(p){const w=a.clientWidth,h=a.clientHeight,r=p.r;if(p.x<r){p.x=r;p.vx=Math.abs(p.vx)*.84}if(p.x>w-r){p.x=w-r;p.vx=-Math.abs(p.vx)*.84}if(p.y<r){p.y=r;p.vy=Math.abs(p.vy)*.84}if(p.y>h-r){p.y=h-r;p.vy=-Math.abs(p.vy)*.84}}
+function collide(A,B){if(A.launch>0||B.launch>0)return;let dx=B.x-A.x,dy=B.y-A.y,d=Math.hypot(dx,dy)||.001,min=A.r+B.r;if(d>=min)return;let nx=dx/d,ny=dy/d,rv=(B.vx-A.vx)*nx+(B.vy-A.vy)*ny;if(rv<0){const j=-rv;A.vx-=j*nx;A.vy-=j*ny;B.vx+=j*nx;B.vy+=j*ny}const push=(min-d)/2;A.x-=nx*push;A.y-=ny*push;B.x+=nx*push;B.y+=ny*push}
+function checkGoal(p){if(p.captured||S.locked||p.launch>0)return;const c={x:a.clientWidth/2,y:a.clientHeight*.43},d=Math.hypot(c.x-p.x,c.y-p.y);if(d<Math.max(25,a.clientWidth*.065)){p.captured=true;S.locked=true;S.scores[p.side]++;hud();$('big').textContent=P[p.side].name+' का अंक!';$('big').classList.remove('show');void $('big').offsetWidth;$('big').classList.add('show');msg(P[p.side].name+' ने अंक बनाया • अगला राउंड');setTimeout(()=>{S.round++;S.locked=false;countdown(spawn)},850)}}
 function draw(){ctx.clearRect(0,0,a.clientWidth,a.clientHeight);for(const p of S.balls){const col=P[p.side].color;p.trail.forEach((q,i)=>{ctx.globalAlpha=i/p.trail.length*.2;ctx.fillStyle=col;ctx.beginPath();ctx.arc(q.x,q.y,p.r*(.25+i/p.trail.length*.4),0,Math.PI*2);ctx.fill()});ctx.globalAlpha=1;ctx.save();ctx.translate(p.x,p.y);ctx.shadowBlur=20;ctx.shadowColor=col;ctx.fillStyle=col;ctx.beginPath();ctx.arc(0,0,p.r,0,Math.PI*2);ctx.fill();ctx.shadowBlur=0;ctx.fillStyle='#fff';ctx.font='900 '+Math.max(10,p.r*.48)+'px system-ui';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(P[p.side].short,0,1);ctx.restore()}}
 function frame(t){if(!S.last)S.last=t;let dt=Math.min(.05,(t-S.last)/1000);S.last=t;S.acc+=dt;const step=1/120;let n=0;while(S.acc>=step&&n++<8){if(S.balls.length&&!S.locked){S.balls.forEach(p=>gravity(p,step));for(let i=0;i<S.balls.length;i++)for(let j=i+1;j<S.balls.length;j++)collide(S.balls[i],S.balls[j]);S.balls.forEach(p=>{wall(p);checkGoal(p)})}S.acc-=step}draw();requestAnimationFrame(frame)}
-function start(){if(S.started)return;S.started=true;g.classList.add('started');$('overlay').classList.add('hidden');msg('लाइव मुकाबला शुरू • सभी गेंदें एक ही बिंदु से');countdown(spawn)}
+function start(){if(S.started)return;S.started=true;g.classList.add('started');$('overlay').classList.add('hidden');msg('लाइव मुकाबला शुरू • साझा spawn point');countdown(spawn)}
 function reset(){S.scores=[0,0,0,0];S.round=1;S.balls=[];S.locked=false;hud();msg('रीसेट • चारों खिलाड़ी बराबर');if(S.started)countdown(spawn)}
 $('start').onclick=start;$('go').onclick=start;$('reset').onclick=reset;g.onpointerdown=()=>{g.classList.toggle('show')};window.onresize=resize;resize();hud();requestAnimationFrame(frame)
 })();
