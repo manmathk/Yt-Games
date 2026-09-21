@@ -10,19 +10,19 @@
   --gold:#ffd54a; --blue:#4db7ff; --red:#ff5964; --green:#50e3a4;
 }
 *{box-sizing:border-box}
-html,body{margin:0;min-height:100%;font-family:Inter,system-ui,Arial,sans-serif;background:radial-gradient(circle at 50% 20%,#183e2a 0,#07110d 52%,#030806 100%);color:#fff;overflow-x:hidden}
+html,body{margin:0;min-height:100%;font-family:Inter,system-ui,Arial,sans-serif;background:#020604;color:#fff;overflow:hidden}
 body{display:flex;justify-content:center}
-.game{width:min(1100px,100%);min-height:100vh;padding:14px 12px 28px;position:relative}
-.topbar{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:12px}
-.brand{font-weight:900;letter-spacing:.8px;font-size:clamp(17px,4vw,27px)}
-.badge{font-size:11px;border:1px solid var(--line);padding:7px 10px;border-radius:999px;background:#ffffff08;color:#cfe7dc}
+.game{width:min(100vw,540px);height:min(100vh,960px);aspect-ratio:9/16;min-height:100vh;padding:10px;position:relative;overflow:hidden;background:linear-gradient(180deg,#07110d,#0a2116);}
+.topbar{display:flex;justify-content:space-between;align-items:center;gap:6px;margin-bottom:7px}
+.brand{font-weight:1000;letter-spacing:.6px;font-size:16px}
+.badge{font-size:8px;border:1px solid var(--line);padding:5px 7px;border-radius:999px;background:#ffffff08;color:#cfe7dc}
 .scoreboard{display:grid;grid-template-columns:1fr 90px 1fr;gap:10px;align-items:stretch}
 .card{background:var(--panel);border:1px solid var(--line);border-radius:18px;box-shadow:0 12px 35px #0007;backdrop-filter:blur(10px)}
 .player-card{padding:12px;text-align:center;position:relative;overflow:hidden;transition:.35s}
 .player-card.active{transform:translateY(-4px);box-shadow:0 0 0 2px var(--gold),0 15px 40px #0009}
 .player-card.ronaldo{--accent:var(--blue)}
 .player-card.messi{--accent:var(--red)}
-.avatar{height:105px;display:flex;justify-content:center;align-items:flex-end;position:relative}
+.avatar{height:105px;display:flex;justify-content:center;align-items:flex-end;position:relative}.real-avatar{width:100%;height:105px;display:flex;justify-content:center;align-items:center;overflow:hidden;border-radius:14px}.real-avatar img{height:100%;width:88px;object-fit:cover;object-position:50% 20%;border-radius:14px;filter:saturate(1.08) contrast(1.05);box-shadow:0 8px 20px #0008}
 .body{width:62px;height:72px;border-radius:24px 24px 12px 12px;background:var(--accent);position:relative;box-shadow:inset 0 -12px #0002}
 .head{width:48px;height:48px;border-radius:50%;background:#b97852;position:absolute;top:-34px;left:7px;border:3px solid #24170f}
 .hair{position:absolute;top:-3px;left:4px;width:40px;height:18px;background:#211710;border-radius:60% 60% 30% 30%}
@@ -34,7 +34,7 @@ body{display:flex;justify-content:center}
 .score{font-size:clamp(38px,9vw,62px);font-weight:1000;line-height:1;margin:5px 0;color:var(--accent);text-shadow:0 0 22px color-mix(in srgb,var(--accent),transparent 55%)}
 .vs{display:flex;flex-direction:column;justify-content:center;align-items:center;font-weight:1000;font-size:26px;color:#fff8}
 .round{font-size:10px;color:#9db4aa;letter-spacing:1px;margin-top:4px}
-.field{margin-top:12px;min-height:430px;position:relative;overflow:hidden;border-radius:24px;border:1px solid #fff2;background:
+.field{margin-top:7px;height:54vh;min-height:0;position:relative;overflow:hidden;border-radius:24px;border:1px solid #fff2;background:
 radial-gradient(ellipse at center,#238047 0,#176437 44%,#0c4527 72%,#07301d 100%);
 box-shadow:inset 0 0 90px #001b0b,0 20px 50px #0008}
 .field:before{content:"";position:absolute;inset:0;background:repeating-linear-gradient(90deg,#fff0 0 10%,#fff0 10% 20%,#ffffff08 20% 30%);opacity:.55}
@@ -44,12 +44,12 @@ box-shadow:inset 0 0 90px #001b0b,0 20px 50px #0008}
 .center-dot{position:absolute;width:8px;height:8px;background:#fff;border-radius:50%;left:calc(50% - 4px);top:calc(50% - 4px)}
 .goal{position:absolute;top:38%;width:48px;height:24%;border:3px solid #fff8}
 .goal.left{left:5%;border-left:0}.goal.right{right:5%;border-right:0}
-.player-zone{position:absolute;top:20%;width:27%;height:60%;display:flex;align-items:center;justify-content:center;flex-direction:column;transition:.4s}
+.player-zone{position:absolute;top:18%;width:27%;height:62%;display:flex;align-items:center;justify-content:center;flex-direction:column;transition:.4s}
 .player-zone.left{left:3%}.player-zone.right{right:3%}
 .player-label{font-size:12px;font-weight:900;margin-top:10px;background:#0007;padding:5px 9px;border-radius:99px}
 .celebrate{animation:celebrate .75s ease}
 @keyframes celebrate{0%,100%{transform:scale(1)}35%{transform:scale(1.15) rotate(-3deg)}70%{transform:scale(1.08) rotate(3deg)}}
-.spinner-wrap{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:min(250px,48vw);height:min(250px,48vw);z-index:4}
+.spinner-wrap{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:190px;height:190px;z-index:4}
 .spinner{width:100%;height:100%;border-radius:50%;background:conic-gradient(var(--blue) 0 45deg,var(--red) 45deg 90deg,var(--blue) 90deg 135deg,var(--red) 135deg 180deg,var(--blue) 180deg 225deg,var(--red) 225deg 270deg,var(--blue) 270deg 315deg,var(--red) 315deg 360deg);border:10px solid #07110d;box-shadow:0 0 0 3px #fff5,0 0 45px #0009;transition:transform 4s cubic-bezier(.1,.75,.1,1);position:relative}
 .spinner:after{content:"";position:absolute;inset:32%;border-radius:50%;background:#0a1811;border:4px solid #fff;box-shadow:inset 0 0 18px #000}
 .arrow{position:absolute;z-index:7;left:50%;top:-21px;transform:translateX(-50%);width:0;height:0;border-left:16px solid transparent;border-right:16px solid transparent;border-top:32px solid var(--gold);filter:drop-shadow(0 4px 4px #000); }
@@ -66,9 +66,10 @@ button:disabled{opacity:.45;cursor:not-allowed}
 @keyframes fall{to{transform:translate(var(--x),var(--y)) rotate(720deg);opacity:0}}
 .note{font-size:10px;color:#789087;text-align:center;margin-top:10px}
 @media(max-width:650px){
- .scoreboard{grid-template-columns:1fr 52px 1fr}.avatar{height:78px}.body{transform:scale(.8);transform-origin:bottom}
- .field{min-height:390px}.player-zone{width:30%;top:24%}.spinner-wrap{width:180px;height:180px}
- .goal{display:none}.mini-grid{grid-template-columns:1fr 1fr 1fr}
+ .scoreboard{grid-template-columns:1fr 42px 1fr}.player-card{padding:7px}.avatar{height:82px}.real-avatar{height:82px}.real-avatar img{width:64px}
+ .name{font-size:13px}.role{font-size:8px}.score{font-size:40px}.vs{font-size:19px}.field{height:53vh}
+ .player-zone{width:29%;top:22%}.player-zone .real-avatar{height:150px}.player-zone .real-avatar img{width:105px;height:150px}
+ .spinner-wrap{width:170px;height:170px}.goal{display:none}.mini-grid{grid-template-columns:1fr 1fr 1fr}.mini{padding:7px}
 }
 </style>
 </head>
@@ -81,12 +82,12 @@ button:disabled{opacity:.45;cursor:not-allowed}
 
   <section class="scoreboard">
     <div class="card player-card ronaldo" id="cardR">
-      <div class="avatar"><div class="body"><div class="head"><div class="hair"></div></div><div class="arm a"></div><div class="arm b"></div><div class="ball"></div></div></div>
+      <div class="real-avatar"><img src="https://commons.wikimedia.org/wiki/Special:FilePath/Cristiano_Ronaldo_playing_for_Al-Nassr_FC_against_Persepolis,_September_2023_(cropped).jpg" alt="Cristiano Ronaldo"></div>
       <div class="name">RONALDO</div><div class="role">Player A</div><div class="score" id="scoreR">0</div>
     </div>
     <div class="card vs"><div>VS</div><div class="round" id="round">ROUND 1</div></div>
     <div class="card player-card messi" id="cardM">
-      <div class="avatar"><div class="body"><div class="head"><div class="hair"></div></div><div class="arm a"></div><div class="arm b"></div><div class="ball"></div></div></div>
+      <div class="real-avatar"><img src="https://commons.wikimedia.org/wiki/Special:FilePath/Lionel_Messi_2025.jpg" alt="Lionel Messi"></div>
       <div class="name">MESSI</div><div class="role">Player B</div><div class="score" id="scoreM">0</div>
     </div>
   </section>
@@ -116,7 +117,7 @@ button:disabled{opacity:.45;cursor:not-allowed}
     <div class="card mini"><b id="last">—</b><span>Last Winner</span></div>
     <div class="card mini"><b id="streak">0</b><span>Streak</span></div>
   </div>
-  <div class="note">The result is determined by the spinner's randomized final sector. No player is given an advantage.</div>
+  <div class="note">Neutral randomized draw • Photos: Wikimedia Commons (CC licensed) • Auto-play mode</div>
 </div>
 
 <script>
@@ -133,7 +134,7 @@ button:disabled{opacity:.45;cursor:not-allowed}
   const zoneR = document.getElementById('zoneR'), zoneM = document.getElementById('zoneM');
   let r=0,m=0,round=1,turns=0,streak=0,last='',rotation=0,sound=true,locked=false;
 
-  let ctx;
+  let ctx, musicTimer=null;
   function audio(){
     if(!sound) return;
     ctx ||= new (window.AudioContext || window.webkitAudioContext)();
@@ -149,6 +150,13 @@ button:disabled{opacity:.45;cursor:not-allowed}
     o.connect(g);g.connect(c.destination);o.start(c.currentTime+delay);o.stop(c.currentTime+delay+dur+.02);
   }
   function tick(){tone(850,.035,'square',.018)}
+  function startMusic(){
+    if(!sound || musicTimer) return;
+    audio();
+    const notes=[196,220,247,294,330,294,247,220];
+    let i=0;
+    musicTimer=setInterval(()=>{tone(notes[i++%notes.length],.42,'sine',.012);},360);
+  }
   function winSound(){[523,659,784,1047].forEach((f,i)=>tone(f,.18,'sine',.05,i*.07))}
   function speak(text){
     if(!sound || !('speechSynthesis' in window)) return;
@@ -202,6 +210,7 @@ button:disabled{opacity:.45;cursor:not-allowed}
       status.innerHTML=`🏆 <strong>${winner}</strong> gets the point — random draw complete!`;
       speak(winner+' gets the point. New round coming up.');
       locked=false;spinBtn.disabled=false;
+      setTimeout(()=>{ if(!locked) spin(); },1800);
     },4200);
   }
   function reset(){
@@ -211,8 +220,10 @@ button:disabled{opacity:.45;cursor:not-allowed}
     status.textContent='Press SPIN to start the neutral draw.';
     if('speechSynthesis' in window) speechSynthesis.cancel();
   }
-  spinBtn.addEventListener('click',spin);
-  resetBtn.addEventListener('click',()=>{tone(300,.08);reset()});
+  spinBtn.addEventListener('click',()=>{startMusic();spin()});
+  // Visual autoplay. Browsers may require a first tap before WebAudio/speech can play.
+  setTimeout(()=>{ if(!locked) { startMusic(); spin(); } },1200);
+  resetBtn.addEventListener('click',()=>{tone(300,.08);reset();setTimeout(()=>spin(),900)});
   soundBtn.addEventListener('click',()=>{
     sound=!sound;soundBtn.textContent=sound?'🔊 SOUND ON':'🔇 SOUND OFF';
     if(sound){tone(660,.1);speak('Sound on');}
