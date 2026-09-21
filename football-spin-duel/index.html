@@ -179,6 +179,7 @@ button:disabled{opacity:.45;cursor:not-allowed}
   </section>
 
   <div class="status" id="status">AUTO SPINNING…</div>
+  <audio id="bgMusic" src="../Graveyard%20Drift.mp3" loop preload="auto" playsinline></audio>
   <div class="controls">
     <button id="spinBtn">🎯 SPIN</button>
     <button class="secondary" id="soundBtn">🔊 SOUND</button>
@@ -207,7 +208,7 @@ button:disabled{opacity:.45;cursor:not-allowed}
   const zoneR = document.getElementById('zoneR'), zoneM = document.getElementById('zoneM');
   let r=0,m=0,round=1,turns=0,streak=0,last='',rotation=0,sound=true,locked=false;
 
-  let ctx, musicTimer=null;
+  let ctx, musicTimer=null; const bgMusic=document.getElementById('bgMusic'); bgMusic.volume=.16;
   function audio(){
     if(!sound) return;
     ctx ||= new (window.AudioContext || window.webkitAudioContext)();
@@ -224,21 +225,49 @@ button:disabled{opacity:.45;cursor:not-allowed}
   }
   function tick(){tone(850,.035,'square',.018)}
   function startMusic(){
-    if(!sound || musicTimer) return;
-    audio();
-    const notes=[196,220,247,294,330,294,247,220];
-    let i=0;
-    musicTimer=setInterval(()=>{tone(notes[i++%notes.length],.42,'sine',.012);},360);
+    if(!sound) return;
+    try{
+      const p=bgMusic.play();
+      if(p && p.catch) p.catch(()=>{});
+    }catch(e){}
   }
-  function winSound(){[523,659,784,1047].forEach((f,i)=>tone(f,.18,'sine',.05,i*.07))}
-  function speak(text){
-    if(!sound || !('speechSynthesis' in window)) return;
-    speechSynthesis.cancel();
-    const u=new SpeechSynthesisUtterance(text);
+  function winSound(){[523,659,784,1047].forEach((f,i)=>tone(f,.18,'sine',.04,i*.07))}
+  function applause(){
+    if(!sound) return;
+    const c=audio();
+    const master=c.createGain(); master.gain.value=.34; master.connect(c.destination);
+    const start=c.currentTime;
+    for(let i=0;i<34;i++){
+      const t=start+i*.045+Math.random()*.045;
+      const dur=.035+Math.random()*.055;
+      const buffer=c.createBuffer(1,Math.floor(c.sampleRate*dur),c.sampleRate);
+      const data=buffer.getChannelData(0);
+      for(let j=0;j<data.length;j++) data[j]=(Math.random()*2-1)*Math.exp(-j/data.length*5);
+      const src=c.createBufferSource(), g=c.createGain();
+      src.buffer=buffer; g.gain.value=.12+Math.random()*.12;
+      src.connect(g);g.connect(master);src.start(t);src.stop(t+dur);
+    }
+    setTimeout(()=>{try{master.disconnect()}catch(e){}},2200);
+  }
+  function bestVoice(){
+    if(!('speechSynthesis' in window)) return null;
     const voices=speechSynthesis.getVoices();
-    const v=voices.find(x=>/female|zira|samantha|google uk english female|google us english/i.test(x.name)) || voices.find(x=>/^en/i.test(x.lang));
-    if(v) u.voice=v;
-    u.rate=.95;u.pitch=1.12;u.volume=.85;
+    const preferred=/Microsoft (Andrew|Brian|Guy|Jenny|Aria|Sonia|Ryan|Libby)|Google (US English|UK English)|Samantha|Daniel|Karen|Alex|Enhanced|Premium/i;
+    return voices.find(v=>preferred.test(v.name) && /^en(-US|-GB)?/i.test(v.lang))
+      || voices.find(v=>preferred.test(v.name))
+      || voices.find(v=>/^en-US$/i.test(v.lang))
+      || voices.find(v=>/^en/i.test(v.lang))
+      || voices.find(v=>v.default) || null;
+  }
+  function speakWinner(winner){
+    if(!sound || !('speechSynthesis' in window)) {applause();return;}
+    speechSynthesis.cancel();
+    const u=new SpeechSynthesisUtterance(winner);
+    const v=bestVoice(); if(v) u.voice=v;
+    u.lang=v?.lang || 'en-US';
+    u.rate=.86; u.pitch=.92; u.volume=.98;
+    u.onend=()=>setTimeout(applause,140);
+    u.onerror=()=>applause();
     speechSynthesis.speak(u);
   }
   function confetti(){
@@ -260,8 +289,7 @@ button:disabled{opacity:.45;cursor:not-allowed}
   function spin(){
     if(locked) return;
     locked=true;spinBtn.disabled=true;cardR.classList.remove('active');cardM.classList.remove('active');
-    status.textContent='Spinning… the result is randomized.';
-    speak('Round '+round+'. The wheel is spinning. Let the neutral draw decide.');
+    status.textContent='Spinning…';
     const sector=Math.floor(Math.random()*8);
     const winner=(sector%2===0)?'RONALDO':'MESSI';
     const sectorCenter=22.5+sector*45;
@@ -280,8 +308,8 @@ button:disabled{opacity:.45;cursor:not-allowed}
       last=winner;
       scoreR.textContent=r;scoreM.textContent=m;totalEl.textContent=turns;lastEl.textContent=winner;streakEl.textContent=streak;roundEl.textContent='ROUND '+round;
       setActive(winner);confetti();winSound();
-      status.innerHTML=`🏆 <strong>${winner}</strong> gets the point — random draw complete!`;
-      speak(winner+' gets the point. New round coming up.');
+      status.innerHTML=`🏆 <strong>${winner}</strong> +1`;
+      speakWinner(winner);
       locked=false;spinBtn.disabled=false;
       setTimeout(()=>{ if(!locked) spin(); },1800);
     },4200);
@@ -296,13 +324,14 @@ button:disabled{opacity:.45;cursor:not-allowed}
   spinBtn.addEventListener('click',()=>{startMusic();spin()});
   // Visual autoplay. Browsers may require a first tap before WebAudio/speech can play.
   setTimeout(()=>{ if(!locked) { startMusic(); spin(); } },1200);
-  resetBtn.addEventListener('click',()=>{tone(300,.08);reset();setTimeout(()=>spin(),900)});
+  resetBtn.addEventListener('click',()=>{startMusic();tone(300,.08);reset();setTimeout(()=>spin(),900)});
   soundBtn.addEventListener('click',()=>{
     sound=!sound;soundBtn.textContent=sound?'🔊 SOUND ON':'🔇 SOUND OFF';
-    if(sound){tone(660,.1);speak('Sound on');}
-    else if('speechSynthesis' in window) speechSynthesis.cancel();
+    if(sound){startMusic();tone(660,.1);}
+    else {bgMusic.pause(); if('speechSynthesis' in window) speechSynthesis.cancel();}
   });
   if('speechSynthesis' in window) speechSynthesis.onvoiceschanged=()=>{};
+  document.addEventListener('pointerdown',()=>{if(sound) startMusic()},{once:false});
 })();
 </script>
 </body>
