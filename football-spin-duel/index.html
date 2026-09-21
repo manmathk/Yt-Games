@@ -12,12 +12,12 @@
 *{box-sizing:border-box}
 html,body{margin:0;min-height:100%;font-family:Inter,system-ui,Arial,sans-serif;background:#020604;color:#fff;overflow:hidden}
 body{display:flex;justify-content:center}
-.game{width:min(100vw,540px);height:min(100vh,960px);aspect-ratio:9/16;min-height:100vh;padding:10px;position:relative;overflow:hidden;background:linear-gradient(180deg,#07110d,#0a2116);}
-.topbar{display:flex;justify-content:space-between;align-items:center;gap:6px;margin-bottom:7px}
+.game{width:100%;max-width:540px;height:100dvh;min-height:100dvh;margin:0 auto;padding:10px;position:relative;overflow:hidden;background:linear-gradient(180deg,#07110d,#0a2116);}
+.topbar{display:flex;justify-content:space-between;align-items:center;gap:6px;margin-bottom:7px;min-width:0}.topbar>*{min-width:0}
 .brand{font-weight:1000;letter-spacing:.6px;font-size:16px}
 .badge{font-size:8px;border:1px solid var(--line);padding:5px 7px;border-radius:999px;background:#ffffff08;color:#cfe7dc}
-.scoreboard{display:grid;grid-template-columns:1fr 90px 1fr;gap:10px;align-items:stretch}
-.card{background:var(--panel);border:1px solid var(--line);border-radius:18px;box-shadow:0 12px 35px #0007;backdrop-filter:blur(10px)}
+.scoreboard{display:grid;grid-template-columns:minmax(0,1fr) 54px minmax(0,1fr);gap:7px;align-items:stretch;width:100%;min-width:0}
+.card{min-width:0;background:var(--panel);border:1px solid var(--line);border-radius:18px;box-shadow:0 12px 35px #0007;backdrop-filter:blur(10px)}
 .player-card{padding:12px;text-align:center;position:relative;overflow:hidden;transition:.35s}
 .player-card.active{transform:translateY(-4px);box-shadow:0 0 0 2px var(--gold),0 15px 40px #0009}
 .player-card.ronaldo{--accent:var(--blue)}
@@ -66,10 +66,10 @@ button:disabled{opacity:.45;cursor:not-allowed}
 @keyframes fall{to{transform:translate(var(--x),var(--y)) rotate(720deg);opacity:0}}
 .note{font-size:10px;color:#789087;text-align:center;margin-top:10px}
 @media(max-width:650px){
- .scoreboard{grid-template-columns:1fr 42px 1fr}.player-card{padding:7px}.avatar{height:82px}.real-avatar{height:82px}.real-avatar img{width:64px}
- .name{font-size:13px}.role{font-size:8px}.score{font-size:40px}.vs{font-size:19px}.field{height:53vh}
- .player-zone{width:29%;top:22%}.player-zone .real-avatar{height:150px}.player-zone .real-avatar img{width:105px;height:150px}
- .spinner-wrap{width:170px;height:170px}.goal{display:none}.mini-grid{grid-template-columns:1fr 1fr 1fr}.mini{padding:7px}
+ .topbar{margin-bottom:5px}.brand{font-size:13px;white-space:nowrap}.badge{display:none}.scoreboard{grid-template-columns:minmax(0,1fr) 38px minmax(0,1fr);gap:5px}.player-card{padding:6px}.avatar{height:72px}.real-avatar{height:72px}.real-avatar img{width:58px}
+ .name{font-size:12px}.role{font-size:8px}.score{font-size:34px}.vs{font-size:17px}.field{height:52dvh;min-height:0}
+ .player-zone{width:24%;top:25%}.player-zone .real-avatar{height:118px}.player-zone .real-avatar img{width:82px;height:118px}
+ .spinner-wrap{width:min(46vw,170px);height:min(46vw,170px)}.goal{display:none}.mini-grid{grid-template-columns:1fr 1fr 1fr}.mini{padding:7px}
 }
 </style>
 </head>
@@ -105,10 +105,10 @@ button:disabled{opacity:.45;cursor:not-allowed}
     </div>
   </section>
 
-  <div class="status" id="status">Press SPIN to start the neutral draw.</div>
+  <div class="status" id="status">AUTO SPINNING…</div>
   <div class="controls">
     <button id="spinBtn">🎯 SPIN</button>
-    <button class="secondary" id="soundBtn">🔊 SOUND ON</button>
+    <button class="secondary" id="soundBtn">🔊 SOUND</button>
     <button class="secondary" id="resetBtn">↻ RESET</button>
   </div>
 
@@ -117,7 +117,7 @@ button:disabled{opacity:.45;cursor:not-allowed}
     <div class="card mini"><b id="last">—</b><span>Last Winner</span></div>
     <div class="card mini"><b id="streak">0</b><span>Streak</span></div>
   </div>
-  <div class="note">Neutral randomized draw • Photos: Wikimedia Commons (CC licensed) • Auto-play mode</div>
+  <div class="note">Neutral random draw • Auto-play • 9:16 vertical</div>
 </div>
 
 <script>
